@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  logo      String?
+  website   String
+  jobs      Job[]
+  logs      ScrapeLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  externalId  String
+  title       String
+  location    String
+  department  String?
+  experience  String?
+  url         String
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+  scrapedAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
+
+  @@unique([companyId, externalId])
+}
+
+model ScrapeLog {
+  id         String   @id @default(cuid())
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  String
+  status     String
+  jobsFound  Int
+  duration   Int
+  error      String?
+  createdAt  DateTime @default(now())
+}
